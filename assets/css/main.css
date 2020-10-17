@@ -2636,6 +2636,44 @@ input, select, textarea {
 				margin: 0 0 4em 0;
 			}
 
+			#first_assistant_desc {display: flex;
+				flex-direction: column;
+				top: 15px;
+				width: 30vw;
+				justify-content: center;
+				align-items: center;
+				text-align: center;
+				
+			}
+
+
+#loading_dots {display: none;
+	position: relative;
+	top: 15px;
+	width: 60vw;
+	height: 35px;}
+ 
+
+#output {display: none;
+	position: relative;
+	top: 15px;
+	width: 60vw;
+	height: 35px;}
+
+	#myInput {display: block;
+		border: 3px solid #555;
+		width: 100%;
+	
+	}
+	input[type=text], select {
+		width: 100%;
+		padding: 12px 20px;
+		margin: 8px 0;
+		display: inline-block;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		box-sizing: border-box;
+	  }
 		/* Poptrox */
 
 			.poptrox-popup .nav-next,
@@ -2651,5 +2689,6 @@ input, select, textarea {
 			.poptrox-popup .closer {
 				opacity: 0.5;
 			}
+			
 
 	}

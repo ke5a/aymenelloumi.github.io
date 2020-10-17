@@ -4,6 +4,8 @@
 	html5up.net | @ajlkn
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 -->
+
+
 <html>
 	<head>
 		<title>Aymen Elloumi</title>
@@ -19,7 +21,14 @@
 				<header>
 					<h1>Aymen Elloumi</h1>
 					<p>A HIGHLY-MOTIVATED DATA CONSULTANT FROM TUNISIA WHO IS CURRENTLY INTO BUSINESS INTELLIGENCE</p>
+			<!-- Currently only supports Web version for AI personal assistant, because of the precision issue (16 vs 32 bit) using WebGL backend and CPU backend is too slow.  -->
+			<p><input autocomplete="off" type="text" placeholder="Ask Me anything about me" id="myInput" size = 40/></p>
+			<div id="first_assistant_desc"><i><small>Hi, I am Aymen's personal AI assistant. I am built on top of the pre-trained USE-lite model for QnA task from TensorFlow-js. </br> Please ask me anything about myself with a complete sentence (e.g: "What are his skills?") and I'll try my best to answer your queries :)</small></i></div>
+			<div class="lds-ellipsis" id="loading_dots"><div></div><div></div><div></div><div></div></div>
+			<strong><div id="output"></div></strong>
+
 				</header>
+				
 				<footer>
 					<a href="#banner" class="button style2 scrolly-middle">More About Aymen</a>
 				</footer>
@@ -61,6 +70,18 @@
 					<p>ESPRIT School of Engineering in Information Technology, Major in Business Intelligence and Data Science.</p>
 				</div>
 			
+			</article>
+
+		<!-- Feature 2 -->
+			<article class="container box style1 left">
+				<a href="#" class="image fit"><img src="images/pic02.jpg" alt="" /></a>
+				<div class="inner">
+					<header>
+						<h2>About Experiences<br />
+						</h2>
+					</header>
+					<p>Section INC...</p>
+				</div>
 			</article>
 
 		<!-- Portfolio -->
@@ -280,6 +301,394 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+			<!-- References: 
+			1) https://github.com/tensorflow/tfjs-models/blob/master/qna/demo/index.js
+			2) https://github.com/tensorflow/tfjs-models/tree/master/universal-sentence-encoder
+			3) https://github.com/google/making_with_ml/blob/master/semantic_ml/use_sample.js -->
+					<!-- Load TensorFlow.js. This is required to use the USE model. -->
+			<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"> </script>
+					<!-- Load the USE model. -->
+			<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"> </script>
+			<!--  OKKK -->
+
+
+			<script>
+				let modelUSE = {};
+				let input;
+				let answerDiv;
+
+				// Utils for handling vectors
+				// Functions below taken from https://www.npmjs.com/package/@tensorflow-models/universal-sentence-encoder
+
+				// Calculate the dot product of two vector arrays.
+				const dotProduct = (xs, ys) => {
+				const sum = xs => xs ? xs.reduce((a, b) => a + b, 0) : undefined;
+
+				return xs.length === ys.length ?
+					sum(zipWith((a, b) => a * b, xs, ys))
+					: undefined;
+				}
+
+				// zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+				const zipWith =
+					(f, xs, ys) => {
+					const ny = ys.length;
+					return (xs.length <= ny ? xs : xs.slice(0, ny))
+						.map((x, i) => f(x, ys[i]));
+					}
+				
+				// General Model
+
+				// Given a model, a query (i.e. "What is his current job"), and
+				// an array of responses (["He is doing great.", "He is currently working at X."]),
+				// returns responses ranked by best reply.
+				const process_general = async () => {
+					const model = await modelUSE;
+					const input = {
+						queries: [query.value.toLowerCase()],
+						responses: ["Aymen do have 3 main strengths: Highly Motivated, fast-learner, and Natural Leader.",
+									"Aymen do have 3 main skills: Highly Motivated, fast-learner, and Natural Leader.",						
+									"Aymen is currently working as a data consultant in Luxembourg",
+									"Aymen is highly skilled at Analysis, conceiving and modelisation.",
+									"His hobbies are watching playing music, he's actually a musician and CrossFit.",
+									"Aymen can be described  as a highly-motivated Data Scientist and Business Intelligence Engineer from Tunisia.",
+									"This page is Aymen's personal website :) Feel free to explore this page.",
+									"The name of this page's is Aymen Elloumi. Please call him Aymen :)",
+									"You can call him Aymen :)",
+									"Hi! Welcome to Elloumi Aymen's personal website. This website is powered by AI to help you understand more about Aymen. Simply ask all of your questions to his personal AI assistant (search bar), and it will give you the response :)",
+									"You probably don't know Aymen yet. Please feel free to explore this page to know more about him :)",
+									"Currently Aymen is based in Luxembourg.",
+									"Aymen currently lives in Luxembourg.",
+									"Age is just a number :)",
+									"Aymen is in Love with a very beautiful Girl",
+									"He is not married yet, But He is in love",
+									"He is so much in love, and love is his essence",
+									"She is just a wonderful amazing person",
+									"His mother is his inspiration",
+									"Currently working as a Data Science Consultant in Luxembourg",
+									"Aymen is Great at time-management. Everything is scheduled properly in his calendar.",
+									"For more info about his experiences, publications, education history, and languages skill, please see the Resume section below.",
+									"For more info about the introduction and summary about Aymen, please see the Intro section below.",
+									"He pursued a Business Intellignce major in ESPRIT.",
+									"He studied Business Intellignce major in ESPRIT.",
+									"According to Wikipedia, Natural language processing (NLP) is a subfield of linguistics, computer science, information engineering, and artificial intelligence concerned with the interactions between computers and human (natural) languages, in particular how to program computers to process and analyze large amounts of natural language data.",
+                                    "This personal AI assistant is built using the pre-trained USE-lite model for QnA task from TensorFlow-js.",
+									"Aymen is currently working as a data consultant in Luxembourg",
+									"Aymen is a highly motivated engineer, currently working as a data consultant in Luxembourg",
+									"The model used in his personal AI assistant is the pre-trained USE-lite model for QnA task from TensorfFow-js.",
+									"The model used in his search bar is the pre-trained USE-lite model for QnA task from TensorFlow-js.",
+									"This search bar is Aymen's personal AI assistant. It is built using the pre-trained USE-lite model for QnA task from TensorFlow-js.",
+									"He is currently working as a Data Science Consultant at Maltem Consulting Group",
+									"His name is Aymen. Elloumi Aymen.",
+									"He is highly-motivated Data Scientist and Business Intelligence Engineer from Tunisia and currently into Every Aspects of Data. For more info about him, please check the Intro section below.",
+									"Yes his day went good. Thanks for asking!",
+									"Aymen is currently working as a data consultant in Luxembourg",
+									"What makes him unique: he have a great personality (strong-willed, fast-learner, effective) with much direct industrial experiences even though he's a fresh-graduate.",
+									"The reasons why he is unique and valuable to any team are because he have a great personality (strong-willed, fast-learner, effective) with much direct industrial experiences even though he is a fresh-graduate.",
+									"Tha Data field is so muchi interesting for him. If you want to have a deeper discussion about this, please reach him out through his LinkedIn.",
+									"The reason why he loves Data Science (DS) because he found it interesting where one can extract insights from data and moreover can predict what will be happen in the future. It was also a challenge for him to initiate into Data.",
+									"For technical skills,  familiar with Python, Tableau, SQL, R, MSBI(SSIS, SSAS, SSRS), SAP BODS...",
+									"Aymen is highly skilled at Analysis, conceiving and modelisation.",
+								]
+					};
+
+					const embeddings  = await model.embed(input);
+					const embed_query = embeddings['queryEmbedding'].arraySync()[0];
+					const embed_responses = embeddings['responseEmbedding'].arraySync();
+
+					let scores = [];
+					// compute the dotProduct of each query and response pair.
+					for (let i = 0; i < embed_responses.length; i++) {
+						scores.push(dotProduct(embed_query, embed_responses[i]));
+						if (i == embed_responses.length-1){
+							// After finished computing the score, hide the loading dots again
+							document.getElementById("loading_dots").style.display = 'none';
+						}
+					}    
+
+					var max_idx = scores.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
+
+					console.log(scores);
+					console.log(tf.getBackend());
+
+					if (scores[max_idx] < 10.5) {
+						chosen_response = "Sorry, I can't respond to that query for now. Please do reach Me out directly through LinkedIn to discuss your query with me :)";
+					} else {
+						chosen_response = input['responses'][max_idx];
+					}
+
+					// Show the output
+					answerDiv.style.display = 'inline-block';
+
+					answerDiv.innerHTML = chosen_response;
+					output_timeout = setTimeout(function(){ 
+						answerDiv.innerHTML = "";
+					}, chosen_response.length*55);
+				
+				};
+
+
+				// JOBS Model
+				
+				// Given a model, a query (i.e. "What is his current job"), and
+				// an array of responses (["He is doing great.", "He is currently working at X."]),
+				// returns responses ranked by best reply.
+				const process_trave = async () => {
+					var jobs_query = query.value.toLowerCase();
+
+					trave_query = trave_query.replace(" Experiences","")
+					trave_query = trave_query.replace(" experience","")
+					trave_query = trave_query.replace(" expertise","")
+					trave_query = trave_query.replace(" experience","")
+
+					const model = await modelUSE;
+					const input = {
+						queries: [jobs_query],
+						responses: [
+							"INC..."
+								]
+					};
+
+					const embeddings  = await model.embed(input);
+					const embed_query = embeddings['queryEmbedding'].arraySync()[0];
+					const embed_responses = embeddings['responseEmbedding'].arraySync();
+
+					let scores = [];
+					// compute the dotProduct of each query and response pair.
+					for (let i = 0; i < embed_responses.length; i++) {
+						scores.push(dotProduct(embed_query, embed_responses[i]));
+						if (i == embed_responses.length-1){
+							// After finished computing the score, hide the loading dots again
+							document.getElementById("loading_dots").style.display = 'none';
+						}
+					}    
+
+					var max_idx = scores.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
+
+					console.log(scores);
+					console.log(tf.getBackend());
+
+					if (scores[max_idx] < 9) {
+						chosen_response = "Sorry, I can't respond to that query for now. Please do reach Louis out directly through LinkedIn to discuss your query with him :)";
+					} else {
+						chosen_response = input['responses'][max_idx];
+					}
+
+					// Show the output
+					answerDiv.style.display = 'inline-block';
+
+					answerDiv.innerHTML = chosen_response;
+					output_timeout = setTimeout(function(){ 
+						answerDiv.innerHTML = "";
+					}, chosen_response.length*55);
+				
+				};
+
+
+				// Academic Experienes Model
+				
+				// Given a model, a query (i.e. "What is his current job"), and
+				// an array of responses (["He is doing great.", "He is currently working at X."]),
+				// returns responses ranked by best reply.
+				const process_tokped = async () => {
+					var academic_query = query.value.toLowerCase();
+
+					academic_query = tokped_query.replace(" academic","")
+					academic_query = tokped_query.replace(" school","")
+				
+					const model = await modelUSE;
+					const input = {
+						queries: [academic_query],
+						responses: [
+							"INC..."
+								]
+					};
+
+					const embeddings  = await model.embed(input);
+					const embed_query = embeddings['queryEmbedding'].arraySync()[0];
+					const embed_responses = embeddings['responseEmbedding'].arraySync();
+
+					let scores = [];
+					// compute the dotProduct of each query and response pair.
+					for (let i = 0; i < embed_responses.length; i++) {
+						scores.push(dotProduct(embed_query, embed_responses[i]));
+						if (i == embed_responses.length-1){
+							// After finished computing the score, hide the loading dots again
+							document.getElementById("loading_dots").style.display = 'none';
+						}
+					}    
+
+					var max_idx = scores.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
+
+					console.log(scores);
+					console.log(tf.getBackend());
+
+					if (scores[max_idx] < 9) {
+						chosen_response = "Sorry, I can't respond to that query for now. Please do reach Louis out directly through LinkedIn to discuss your query with him :)";
+					} else {
+						chosen_response = input['responses'][max_idx];
+					}
+
+					// Show the output
+					answerDiv.style.display = 'inline-block';
+
+					answerDiv.innerHTML = chosen_response;
+					output_timeout = setTimeout(function(){ 
+						answerDiv.innerHTML = "";
+					}, chosen_response.length*55);
+				
+				};
+
+
+				// Variable to check it is the first time load or not
+				i = 0;
+				i_model = 0;
+
+				window.onload = () => {		
+					query = document.getElementById('myInput');
+					search = document.getElementById('myButton');
+					answerDiv  = document.getElementById("output");
+
+					console.log(query.value)
+						
+					query.addEventListener('keyup', async (event) => {
+						if (event.key === 'Enter') {
+							if (query.value.toLowerCase()=="hi" || query.value.toLowerCase().includes("hello") || query.value.toLowerCase().includes("hallo") || query.value.toLowerCase().includes("how are you") || query.value.toLowerCase().includes("how's day") || query.value.toLowerCase().includes("what's up") || query.value.toLowerCase().includes("how do you do") || query.value.toLowerCase().includes("morning") || query.value.toLowerCase().includes("evening") || query.value.toLowerCase().includes("afternoon") || query.value.toLowerCase().includes("night")) {
+								if (i == 0){
+									// Hide output 
+									answerDiv.style.display = 'none';
+									// Hide Assistant Description and show loading dots for the first query
+									document.getElementById("first_assistant_desc").style.display = 'none';
+								} else {
+									// Hide output & clear timeout output from previous iter
+									answerDiv.style.display = 'none';
+									clearTimeout(output_timeout);
+								}
+
+								i = i+1;
+								
+								chosen_response = "Thanks for greeting him! Aymen is doing great. Hope you have a wonderful day :)";
+
+								// Show the output
+								answerDiv.style.display = 'inline-block';
+
+								answerDiv.innerHTML = chosen_response;
+								output_timeout = setTimeout(function(){ 
+									answerDiv.innerHTML = "";
+								}, chosen_response.length*55);
+							} else if (query.value.toLowerCase().includes("where he work") || query.value.toLowerCase().includes("where he works") || query.value.toLowerCase().includes("where is he working")) {
+								if (i == 0){
+									// Hide output 
+									answerDiv.style.display = 'none';
+									// Hide Assistant Description and show loading dots for the first query
+									document.getElementById("first_assistant_desc").style.display = 'none';
+								} else {
+									// Hide output & clear timeout output from previous iter
+									answerDiv.style.display = 'none';
+									clearTimeout(output_timeout);
+								}
+
+								i = i+1;
+								
+								chosen_response = "He is currently working as a Data Science Consultant at The World Bank.";
+
+								// Show the output
+								answerDiv.style.display = 'inline-block';
+
+								answerDiv.innerHTML = chosen_response;
+								output_timeout = setTimeout(function(){ 
+									answerDiv.innerHTML = "";
+								}, chosen_response.length*55);
+							} else if (query.value.toLowerCase().includes("last intern")) {
+								if (i == 0){
+									// Hide output 
+									answerDiv.style.display = 'none';
+									// Hide Assistant Description and show loading dots for the first query
+									document.getElementById("first_assistant_desc").style.display = 'none';
+								} else {
+									// Hide output & clear timeout output from previous iter
+									answerDiv.style.display = 'none';
+									clearTimeout(output_timeout);
+								}
+
+								i = i+1;
+
+								chosen_response = "His last internship was at InstaDeep as an AI Research Intern.";
+
+								// Show the output
+								answerDiv.style.display = 'inline-block';
+
+								answerDiv.innerHTML = chosen_response;
+								output_timeout = setTimeout(function(){ 
+									answerDiv.innerHTML = "";
+								}, chosen_response.length*55);
+							} else if (query.value.toLowerCase().includes("first intern")) {
+								if (i == 0){
+									// Hide output 
+									answerDiv.style.display = 'none';
+									// Hide Assistant Description and show loading dots for the first query
+									document.getElementById("first_assistant_desc").style.display = 'none';
+								} else {
+									// Hide output & clear timeout output from previous iter
+									answerDiv.style.display = 'none';
+									clearTimeout(output_timeout);
+								}
+
+								i = i+1;
+
+								chosen_response = "His first internship was at Melioz as a LMS Developer Intern.";
+
+								// Show the output
+								answerDiv.style.display = 'inline-block';
+
+								answerDiv.innerHTML = chosen_response;
+								output_timeout = setTimeout(function(){ 
+									answerDiv.innerHTML = "";
+								}, chosen_response.length*55);
+							} else {
+								console.log(i)
+								if (i_model == 0){
+									// Hide output 
+									answerDiv.style.display = 'none';
+									// Hide Assistant Description and show loading dots for the first query
+									document.getElementById("first_assistant_desc").style.display = 'none';
+									document.getElementById("loading_dots").style.display = 'inline-block';
+									modelUSE = use.loadQnA();
+								} else {
+									// Hide output & clear timeout output from previous iter
+									answerDiv.style.display = 'none';
+									clearTimeout(output_timeout);
+								}
+
+								i_model = i_model+1;
+
+								// Currently only supports Web version for AI personal assistant, because of the precision issue (16 vs 32 bit) using WebGL backend and CPU backend is too slow. 
+								tf.setBackend('webgl');
+								if (query.value.toLowerCase().includes(" traveloka") || query.value.toLowerCase().includes(" tvlk") || query.value.toLowerCase().includes(" trvloka") || query.value.toLowerCase().includes(" trave")) {
+									process_trave();
+								} else if (query.value.toLowerCase().includes(" tokopedia") || query.value.toLowerCase().includes(" toped") || query.value.toLowerCase().includes(" tkpd") || query.value.toLowerCase().includes(" tkopedia")){
+									process_tokped();
+								} else if (query.value.toLowerCase().includes(" do-it") || query.value.toLowerCase().includes(" do it") || query.value.toLowerCase().includes(" doit")){
+									process_doit();
+								} else if (query.value.toLowerCase().includes(" qlue") || (query.value.toLowerCase().includes(" qlie"))) {
+									process_qlue();
+								} else if (query.value.toLowerCase().includes(" world bank") || (query.value.toLowerCase().includes(" wb"))) {
+									process_wb();
+								}else {
+									process_general();
+								}
+							}
+						}
+					});
+				};
+
+			</script>
+
+
+
+
+
+
 
 	</body>
 </html>
